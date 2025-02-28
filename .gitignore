@@ -170,3 +170,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /experiments/glove.6B/
+/auxil/main.aux
+/auxil/main.out
+/out/main.pdf
+/out/main.synctex.gz
