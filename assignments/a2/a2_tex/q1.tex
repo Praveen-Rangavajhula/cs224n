@@ -42,22 +42,27 @@ The predicted distribution $\hat{\by}$ is the probability distribution $P(O|C=c)
 \clearpage
 \begin{parts}
 \part[2]
-Prove that the naive-softmax loss (Equation \ref{naive-softmax}) is the same as the cross-entropy loss between $\by$  and $\hat{\by}$, i.e. (note that $\by$ 
+Prove that the naive-softmax loss (Equation \ref{naive-softmax}) is the same as the cross-entropy loss between $\by$  and $\hat{\by}$, i.e. (note that $\by$
  (true distribution), $\hat{\by}$ (predicted distribution) are vectors and $\hat{\by}_o$ is a scalar):
 
-\begin{equation} 
+\begin{equation}
 -\sum_{w \in \text{Vocab}} \by_w \log(\hat{\by}_w) = - \log (\hat{\by}_o).
 \end{equation}
 
 Your answer should be one line. You may describe your answer in words.
 
+\ifans{
+
+    Since $\by$ is a one-hot vector, only $\by_o = 1$, and all other terms in the summation become zero, leaving $-\log(\hat{\by}_o)$.
+
+}\fi
 
 % Question 1-B
 \part[6]
 \begin{enumerate}[label=\roman*.]
-    \item 
+    \item
     Compute the partial derivative of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to $\bv_c$. \emph{Please write your answer in terms of $\by$, $\hat{\by}$, $\bU$, and show your work to receive full credit}.
-    \begin{itemize} 
+    \begin{itemize}
         \item \textbf{Note}: Your final answers for the partial derivative should follow the shape convention: the partial derivative of any function $f(x)$ with respect to $x$ should have the \textbf{same shape} as $x$.\footnote{This allows us to efficiently minimize a function using gradient descent without worrying about reshaping or dimension mismatching. While following the shape convention, we're guaranteed that $\theta:= \theta - \alpha\frac{\partial J(\theta)}{\partial \theta}$ is a well-defined update rule.}
         \item Please provide your answers for the partial derivative in vectorized form. For example, when we ask you to write your answers in terms of $\by$, $\hat{\by}$, and $\bU$, you may not refer to specific elements of these terms in your final answer (such as $\by_1$, $\by_2$, $\dots$). You may also not refer to specific vectors such as $u_0$, $u_1$, etc.
     \end{itemize}
@@ -69,6 +74,46 @@ Your answer should be one line. You may describe your answer in words.
 
 \end{enumerate}
 
+\ifans{
+\begin{enumerate}[label=\roman*.]
+
+    \item {
+        First, let's clarify what each of these terms means:
+        \begin{align*}
+            \bJ_{\text{naive-softmax}}(\bv_c, o, \bU) &= -\log P(O=o| C=c) \\
+            &= -\log \hat{\by}_o
+        \end{align*}
+        where:
+        \begin{itemize}
+            \item $\by$ is a one-hot vector with a 1 for the true outside word $o$ and 0 everywhere else.
+            \item $\bU$ is a matrix with columns representing all the outside word vectors $\bu_w$.
+        \end{itemize}
+        \begin{align*}
+            \bJ_{\text{naive-softmax}}(\bv_c, o, \bU) &= -\log \hat{\by}_o \\
+            &= -\log \left( \frac{\exp(\bu_{o}^\top \bv_c)}{\sum_{w \in \text{Vocab}} \exp(\bu_{w}^\top \bv_c)} \right) \\
+            &= -\left( \log \exp(\bu_{o}^\top \bv_c) - \log \sum_{w \in \text{Vocab}} \exp(\bu_{w}^\top \bv_c) \right) \\
+
+        \end{align*}
+
+        Now let's start computing the partial derivate of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to $\bv_c$.
+
+        \begin{align*}
+            \frac{\partial \bJ_{\text{naive-softmax}}}{\partial \bv_c} &= \frac{\partial}{\partial \bv_c} \left( -\bu_o^\top \bv_c + \log \sum_{w \in \text{Vocab}} \exp(\bu_w^\top \bv_c) \right) \\
+            &= -\bu_o + \sum_{x \in \text{Vocab}} \frac{\exp(\bu_x^\top \bv_c) \bu_x}{\sum_{w \in \text{Vocab}} \exp(\bu_w^\top \bv_c)} \\
+            &= -\bU \by + \sum_{x \in \text{Vocab}} \hat{\by}_x \bu_x \quad \text{(since $\by$ is one-hot, $\bU \by$ extracts $\bu_o$)} \\
+            &= -\bU \by + \bU \hat{\by} \quad \text{(rewriting the summation as a matrix-vector product)} \\
+            &= \bU (\hat{\by} - \by)
+        \end{align*}
+
+    }
+
+
+
+
+\end{enumerate}
+
+}
+
 
 
 % Question 1-C
@@ -77,15 +122,166 @@ In many downstream applications using word embeddings, L2 normalized vectors (e.
 
 \textbf{Hint:} Consider the case where $\mathbf{u}_x = \alpha\mathbf{u}_y$ for some words $x \neq y$ and some scalar $\alpha$. When $\alpha$ is positive, what will be the value of normalized  $\mathbf{u}_x$ and normalized $\mathbf{u}_y$? How might $\mathbf{u}_x$ and $\mathbf{u}_y$ be related for such a normalization to affect or not affect the resulting classification?
 
+\ifans{
+
+L2 normalization transforms each vector $\mathbf{u}$ into $\frac{\mathbf{u}}{\|\mathbf{u}\|_2}$, which removes the magnitude information while preserving the direction.
+
+\paragraph{When L2 normalization removes useful information:}
+Consider the case where $\mathbf{u}_x = \alpha \mathbf{u}_y$ for some words $x \neq y$ and scalar $\alpha$. After normalization:
+\[
+\frac{\mathbf{u}_x}{\|\mathbf{u}_x\|_2} = \frac{\mathbf{u}_y}{\|\mathbf{u}_y\|_2}
+\]
+Since both vectors become identical after normalization, the difference in their original magnitudes is lost. This is problematic in scenarios where magnitude carries important information.
+
+For example, in the binary classification task where phrase sentiment is determined by summing word embeddings:
+\begin{itemize}
+    \item If positive and negative word embeddings occur in equal numbers, but their \textbf{magnitudes} are different (e.g., positive words have larger magnitudes), normalization removes this distinction, leading to incorrect classifications.
+    \item If a particularly strong sentiment word (e.g., ``amazing'') had a much larger magnitude than a weakly positive word (e.g., ``nice''), normalization would treat them as equally strong, potentially distorting the sentiment classification.
+\end{itemize}
+
+\paragraph{When L2 normalization does not cause issues:}
+\begin{itemize}
+    \item If $\alpha \approx 1$, meaning the vectors already have similar magnitudes, normalization has little to no effect.
+    \item If there are more positive words than negative ones (or vice versa), and their magnitudes are roughly the same, the classification will still be driven by word count rather than magnitude, making normalization relatively harmless.
+    \item If the classification task is \textbf{only} concerned with directionality (e.g., clustering words based on similarity), then removing magnitude is not a problem.
+\end{itemize}
+
+
+
+}
 
 % Question 1-D
 \part[1]
 Write down the partial derivative of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to $\bU$. Please break down your answer in terms of the column vectors $\frac{\partial \bJ(\bv_c, o, \bU)}{\partial \bu_1}$, $\frac{\partial \bJ(\bv_c, o, \bU)}{\partial \bu_2}$, $\cdots$, $\frac{\partial \bJ(\bv_c, o, \bU)}{\partial \bu_{|\text{Vocab}|}}$ (do not further expand these terms). No derivations are necessary, just an answer in the form of a matrix.
 
+\ifans{
+
+The partial derivative of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to $\bU$ is given by:
+
+\begin{align*}
+    \frac{\partial \bJ}{\partial \bU} &=
+    \begin{bmatrix}
+        \frac{\partial \bJ}{\partial \bu_1} & \frac{\partial \bJ}{\partial \bu_2} & \cdots & \frac{\partial \bJ}{\partial \bu_{|\text{Vocab}|}}
+    \end{bmatrix} \\
+    \text{where} \quad \frac{\partial \bJ}{\partial \bu_i} &= (\hat{\by}_i - \by_i) \bv_c.
+\end{align*}
+
+Since each column $\frac{\partial \bJ}{\partial \bu_i}$ follows the same form, we can express the gradient in matrix notation:
+
+\[
+\frac{\partial \bJ}{\partial \bU} = \bv_c (\hat{\by} - \by)^\top.
+\]
+
+\paragraph{Dimension Check:}
+Let the following be defined as:
+\begin{itemize}
+    \item $\bU \in \mathbb{R}^{d \times |\text{Vocab}|}$, where $d$ is the embedding size.
+    \item $\bv_c \in \mathbb{R}^{d \times 1}$, a column vector representing the center word embedding.
+    \item $\hat{\by}, \by \in \mathbb{R}^{|\text{Vocab}| \times 1}$, both column vectors.
+\end{itemize}
+
+The subtraction $\hat{\by} - \by$ results in a column vector of shape $\mathbb{R}^{|\text{Vocab}| \times 1}$.
+Taking the transpose, we obtain $(\hat{\by} - \by)^\top \in \mathbb{R}^{1 \times |\text{Vocab}|}$.
+
+Multiplying:
+
+\[
+\bv_c (\hat{\by} - \by)^\top
+\]
+
+gives a matrix of shape $(d \times 1) \times (1 \times |\text{Vocab}|) = d \times |\text{Vocab}|$,
+which matches the shape of $\bU$.
+
+Thus, the final gradient is correctly formulated as:
+
+\[
+\frac{\partial \bJ}{\partial \bU} = \bv_c (\hat{\by} - \by)^\top.
+\]
+
+}
 
 % Question 1-E
-\part[5] 
+\part[5]
 Compute the partial derivatives of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to each of the `outside' word vectors, $\bu_w$'s. There will be two cases: when $w=o$, the true `outside' word vector, and $w \neq o$, for all other words. Please write your answer in terms of $\by$, $\hat{\by}$, and $\bv_c$. In this subpart, you may use specific elements within these terms as well (such as $\by_1$, $\by_2$, $\dots$). Note that $\bu_w$ is a vector while $\by_1, \by_2, \dots$ are scalars. Show your work to receive full credit.
 
+\ifans{
+
+We want to compute the partial derivative of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to each `outside' word vector $\bu_w$. That is:
+
+\[
+\frac{\partial \bJ}{\partial \bu_w}
+\]
+
+for all words $w$ in the vocabulary.
+
+\paragraph{Step 1: Recall the Loss Function}
+The naive softmax loss function is:
+
+\[
+\bJ_{\text{naive-softmax}} = -\log P(O = o \mid C = c)
+\]
+
+where the probability is given by the softmax function:
+
+\[
+P(O = o \mid C = c) = \frac{\exp(\bu_o^\top \bv_c)}{\sum_{w \in \text{Vocab}} \exp(\bu_w^\top \bv_c)}
+\]
+
+Taking the derivative with respect to $\bu_w$, we differentiate both terms inside the $\log$.
+
+\paragraph{Step 2: Compute the Gradient for Any $\bu_w$}
+Applying the chain rule:
+
+\[
+\frac{\partial \bJ}{\partial \bu_w} = - \frac{1}{P(O = o \mid C = c)} \cdot \frac{\partial}{\partial \bu_w} P(O = o \mid C = c).
+\]
+
+From softmax differentiation, we know:
+
+\[
+\frac{\partial}{\partial \bu_w} P(O = o \mid C = c) =
+P(O = o \mid C = c) ( \mathbf{1}_{[w = o]} - P(O = w \mid C = c) ) \bv_c.
+\]
+
+Substituting this back:
+
+\[
+\frac{\partial \bJ}{\partial \bu_w} = - \left( \mathbf{1}_{[w = o]} - P(O = w \mid C = c) \right) \bv_c.
+\]
+
+Rewriting using $\by_w$ (the one-hot label) and $\hat{\by}_w$ (the softmax output):
+
+\[
+\frac{\partial \bJ}{\partial \bu_w} = (\hat{\by}_w - \by_w) \bv_c.
+\]
+
+\paragraph{Step 3: Special Cases}
+
+- **Case 1: When $w = o$ (the true outside word)**
+
+  Since $\by_o = 1$ and $\hat{\by}_o$ is the softmax probability for the correct outside word:
+
+  \[
+  \frac{\partial \bJ}{\partial \bu_o} = (\hat{\by}_o - 1) \bv_c.
+  \]
+
+- **Case 2: When $w \neq o$ (any other word in the vocabulary)**
+
+  Since $\by_w = 0$ for all words $w \neq o$:
+
+  \[
+  \frac{\partial \bJ}{\partial \bu_w} = \hat{\by}_w \bv_c.
+  \]
+
+\paragraph{Final Answer:}
+\[
+\frac{\partial \bJ}{\partial \bu_w} =
+\begin{cases}
+(\hat{\by}_o - 1) \bv_c, & \text{if } w = o \\
+\hat{\by}_w \bv_c, & \text{if } w \neq o
+\end{cases}
+\]
+
+}
 
 \end{parts}
