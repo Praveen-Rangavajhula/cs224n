@@ -92,9 +92,10 @@ Your answer should be one line. You may describe your answer in words.
             \bJ_{\text{naive-softmax}}(\bv_c, o, \bU) &= -\log \hat{\by}_o \\
             &= -\log \left( \frac{\exp(\bu_{o}^\top \bv_c)}{\sum_{w \in \text{Vocab}} \exp(\bu_{w}^\top \bv_c)} \right) \\
             &= -\left( \log \exp(\bu_{o}^\top \bv_c) - \log \sum_{w \in \text{Vocab}} \exp(\bu_{w}^\top \bv_c) \right) \\
+
         \end{align*}
 
-        Now let's start computing the partial derivative of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to $\bv_c$.
+        Now let's start computing the partial derivate of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respect to $\bv_c$.
 
         \begin{align*}
             \frac{\partial \bJ_{\text{naive-softmax}}}{\partial \bv_c} &= \frac{\partial}{\partial \bv_c} \left( -\bu_o^\top \bv_c + \log \sum_{w \in \text{Vocab}} \exp(\bu_w^\top \bv_c) \right) \\
@@ -104,100 +105,15 @@ Your answer should be one line. You may describe your answer in words.
             &= \bU (\hat{\by} - \by)
         \end{align*}
 
-        \paragraph{Dimension Check:}
-        To verify that $\frac{\partial \bJ_{\text{naive-softmax}}}{\partial \bv_c}$ has the correct shape, let's analyze the dimensions of each term:
-
-        \begin{itemize}
-            \item $\bU \in \mathbb{R}^{d \times |\text{Vocab}|}$, where $d$ is the embedding size.
-            \item $\bv_c \in \mathbb{R}^{d \times 1}$, representing the center word vector.
-            \item $\bu_o \in \mathbb{R}^{d \times 1}$, representing the true outside word vector.
-            \item $\by, \hat{\by} \in \mathbb{R}^{|\text{Vocab}| \times 1}$, both column vectors.
-        \end{itemize}
-
-        The subtraction $\hat{\by} - \by$ results in a column vector of shape $\mathbb{R}^{|\text{Vocab}| \times 1}$.
-        Since $\bU$ has shape $(d \times |\text{Vocab}|)$, multiplying:
-
-        \[
-        \bU (\hat{\by} - \by)
-        \]
-
-        gives a final result of shape $(d \times 1)$,
-        which matches the expected dimension of $\frac{\partial \bJ}{\partial \bv_c}$.
-
-        }
-
-    \item {
-        The gradient which we computed above is $\bU \left( \hat{\by} - \by \right)$.
-        For this gradient to be zero we can clearly see that $\hat{\by} = \by$.
     }
-    \item {
 
-        The gradient update for the center word vector $\bv_c$ is given by:
 
-        \[
-        \bv_c \gets \bv_c - \alpha \bU (\hat{\by} - \by).
-        \]
 
-        Expanding this:
-
-        \[
-        \bv_c \gets \bv_c - \alpha (\bU \hat{\by} - \bU \by).
-        \]
-
-        This equation consists of two main terms:
-
-        \begin{enumerate}
-            \item First term: $\bU \hat{\by}$ (Pulling $\bv_c$ away from incorrect predictions)
-            \begin{itemize}
-                \item $\hat{\by}$ is the softmax probability distribution, meaning it is a weighted sum of all outside word vectors:
-                \[
-                \bU \hat{\by} = \sum_{w \in \text{Vocab}} \hat{\by}_w \bu_w.
-                \]
-                \item Since $\hat{\by}$ assigns probability mass to both correct and incorrect outside words, $\bU \hat{\by}$ represents an averaged prediction.
-                \item Subtracting this term reduces similarity between $\bv_c$ and incorrectly predicted outside words, helping to push $\bv_c$ away from misleading associations.
-            \end{itemize}
-
-            \item Second term: $\bU \by$ (Ensuring $\bv_c$ stays close to the true outside word $\bu_o$)
-            \begin{itemize}
-                \item Since $\by$ is one-hot, the term $\bU \by$ extracts the correct outside word vector $\bu_o$:
-                \[
-                \bU \by = \bu_o.
-                \]
-                \item The gradient formula has a negative sign, meaning we are adding $\bu_o$ back to $\bv_c$.
-                \item This ensures that the center word vector remains close to the true outside word, reinforcing its correct meaning.
-            \end{itemize}
-        \end{enumerate}
-
-        \paragraph{Intuitive Interpretation:}
-        \begin{enumerate}
-            \item The similarity between $\bv_c$ and $\hat{\by}$ decreases
-            \begin{itemize}
-                \item Since $\hat{\by}$ is a weighted sum of multiple outside word vectors, it contains incorrect words.
-                \item Reducing similarity ensures $\bv_c$ is not pulled towards misleading words.
-            \end{itemize}
-
-            \item The similarity between $\bv_c$ and $\bu_o$ increases
-            \begin{itemize}
-                \item Since $\by$ is one-hot, $\bU \by$ extracts only the correct word vector $\bu_o$.
-                \item The update ensures $\bv_c$ remains close to the correct outside word.
-            \end{itemize}
-
-            \item Balancing these two effects improves the word embedding
-            \begin{itemize}
-                \item The model learns to predict the correct outside words more reliably.
-                \item Incorrect associations are weakened, and the center word vector $\bv_c$ better represents its context.
-            \end{itemize}
-        \end{enumerate}
-
-        \paragraph{Final Conclusion:}
-        The gradient update ensures that $\bv_c$ is pulled closer to the correct outside word $\bu_o$ while being pushed away from incorrectly predicted words.
-        This process gradually improves the quality of the learned word embeddings, making them more representative of the words' meanings in different contexts.
-
-    }
 
 \end{enumerate}
 
 }
+
 
 
 % Question 1-C
@@ -230,8 +146,9 @@ For example, in the binary classification task where phrase sentiment is determi
     \item If the classification task is \textbf{only} concerned with directionality (e.g., clustering words based on similarity), then removing magnitude is not a problem.
 \end{itemize}
 
-}
 
+
+}
 
 % Question 1-D
 \part[1]
@@ -249,14 +166,7 @@ The partial derivative of $\bJ_{\text{naive-softmax}}(\bv_c, o, \bU)$ with respe
     \text{where} \quad \frac{\partial \bJ}{\partial \bu_i} &= (\hat{\by}_i - \by_i) \bv_c.
 \end{align*}
 
-Since each column follows the same form, we can factor out $\bv_c$:
-
-\[
-\frac{\partial \bJ}{\partial \bU} =
-\bv_c \begin{bmatrix} \hat{\by}_1 - \by_1 & \hat{\by}_2 - \by_2 & \cdots & \hat{\by}_{|\text{Vocab}|} - \by_{|\text{Vocab}|} \end{bmatrix}.
-\]
-
-Observing the term inside the brackets, we recognize that it is simply the row vector representation of $(\hat{\by} - \by)^\top$, leading to:
+Since each column $\frac{\partial \bJ}{\partial \bu_i}$ follows the same form, we can express the gradient in matrix notation:
 
 \[
 \frac{\partial \bJ}{\partial \bU} = \bv_c (\hat{\by} - \by)^\top.
@@ -347,23 +257,21 @@ Rewriting using $\by_w$ (the one-hot label) and $\hat{\by}_w$ (the softmax outpu
 
 \paragraph{Step 3: Special Cases}
 
-\begin{itemize}
-    \item \textbf{Case 1: When \( w = o \) (the true outside word)}
+- **Case 1: When $w = o$ (the true outside word)**
 
-    Since \( \by_o = 1 \) and \( \hat{\by}_o \) is the softmax probability for the correct outside word:
+  Since $\by_o = 1$ and $\hat{\by}_o$ is the softmax probability for the correct outside word:
 
-    \[
-    \frac{\partial \bJ}{\partial \bu_o} = (\hat{\by}_o - 1) \bv_c.
-    \]
+  \[
+  \frac{\partial \bJ}{\partial \bu_o} = (\hat{\by}_o - 1) \bv_c.
+  \]
 
-    \item \textbf{Case 2: When \( w \neq o \) (any other word in the vocabulary)}
+- **Case 2: When $w \neq o$ (any other word in the vocabulary)**
 
-    Since \( \by_w = 0 \) for all words \( w \neq o \):
+  Since $\by_w = 0$ for all words $w \neq o$:
 
-    \[
-    \frac{\partial \bJ}{\partial \bu_w} = \hat{\by}_w \bv_c.
-    \]
-\end{itemize}
+  \[
+  \frac{\partial \bJ}{\partial \bu_w} = \hat{\by}_w \bv_c.
+  \]
 
 \paragraph{Final Answer:}
 \[
