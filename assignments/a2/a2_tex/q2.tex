@@ -18,7 +18,21 @@
                 	\btheta_{t+1} &\gets \btheta_t - \alpha \bm_{t+1}
                 }
                 where $\beta_1$ is a hyperparameter between 0 and 1 (often set to  0.9). \textbf{Briefly explain in 2--4 sentences} (you don't need to prove mathematically, just give an intuition) how using $\bm$ stops the updates from varying as much and why this low variance may be helpful to learning, overall.\newline
-              
+
+                \ifans{
+
+                    Using $\bm$ stops updates from varying too much because it maintains a
+                    rolling average of past gradients, effectively smoothing out fluctuations
+                    in gradient directions. This reduces noise from sudden gradient changes, ensuring that updates
+                    are more consistent rather than erratic.
+                    \\
+                    As a result, the optimization process prioritizes movement in directions that
+                    consistently lead toward the minimum, while variations in other directions tend to cancel out.
+                    This lower variance helps the model converge faster and more efficiently, making updates
+                    to the weights (or word vectors) more stable, ultimately improving learning and accuracy.
+
+                }
+
                 
             \subpart[2] Adam extends the idea of {\it momentum} with the trick of {\it adaptive learning rates} by keeping track of  $\bv$, a rolling average of the magnitudes of the gradients:
                 \alns{
@@ -28,8 +42,27 @@
                 }
                 where $\odot$ and $/$ denote elementwise multiplication and division (so $\bz \odot \bz$ is elementwise squaring) and $\beta_2$ is a hyperparameter between 0 and 1 (often set to  0.99). Since Adam divides the update by $\sqrt{\bv}$, which of the model parameters will get larger updates?  Why might this help with learning? \textbf{Briefly explain in 2--4 sentences}.
                 
-           
-                
+                \ifans{
+
+                    $\sqrt{v}$ tracks the magnitude of a parameter’s gradient over multiple iterations by maintaining
+                    a rolling average of squared gradients. If a parameter’s gradient magnitude remains small over time,
+                    dividing by $\sqrt{v}$ results in larger updates, ensuring that parameters associated with rare
+                    words receive sufficient training. This helps improve generalization by allowing the model
+                    to learn better embeddings for infrequent words that might otherwise be poorly trained.
+
+                    \hrulefill
+
+                    \small
+                    \textbf{(Extra Intuition - Not Part of Required Answer)}
+
+                    Conversely, parameters with larger gradients receive smaller updates, preventing rapid
+                    fluctuations and ensuring smoother learning. This reduces oscillations, avoids overshooting the
+                    minimum, and leads to more stable convergence. By balancing these adjustments, Adam helps both rare
+                    feature learning and overall optimization stability.
+
+                    \normalsize
+                }
+
                 \end{subparts}
         
         
@@ -47,10 +80,87 @@
             \begin{subparts}
             \subpart[2]
                 What must $\gamma$ equal in terms of $p_{\text{drop}}$? Briefly justify your answer or show your math derivation using the equations given above.
-                
+
+            \ifans{
+
+                We are given:
+
+                \[
+                \bh_{\text{drop}} = \gamma \bd \odot \bh
+                \]
+
+                where:
+                \begin{itemize}
+                    \item $\bd \in \{0,1\}^{D_h}$ is a mask vector where each element is $0$ with probability $p_{\text{drop}}$ and $1$ with probability $1 - p_{\text{drop}}$.
+                    \item $\gamma$ is a scaling factor ensuring that the expected value of $\bh_{\text{drop}}$ remains equal to $\bh$.
+                \end{itemize}
+
+                Thus, we need to satisfy:
+
+                \[
+                \mathbb{E}_{p_{\text{drop}}}[\bh_{\text{drop}}]_i = h_i.
+                \]
+
+                Expanding $\bh_{\text{drop}}$:
+
+                \[
+                \mathbb{E}_{p_{\text{drop}}}[\bh_{\text{drop}}]_i = \mathbb{E}_{p_{\text{drop}}}[\gamma d_i h_i].
+                \]
+
+                Since $\gamma$ and $h_i$ are constants with respect to the expectation, we can factor them out:
+
+                \[
+                \mathbb{E}_{p_{\text{drop}}}[\bh_{\text{drop}}]_i = \gamma h_i \mathbb{E}_{p_{\text{drop}}}[d_i].
+                \]
+
+                Since $d_i$ takes the value $1$ with probability $1 - p_{\text{drop}}$ and $0$ with probability $p_{\text{drop}}$, its expectation is:
+
+                \[
+                \mathbb{E}[d_i] = 1 \cdot (1 - p_{\text{drop}}) + 0 \cdot (p_{\text{drop}}) = 1 - p_{\text{drop}}.
+                \]
+
+                Substituting this back:
+
+                \[
+                \mathbb{E}_{p_{\text{drop}}}[\bh_{\text{drop}}]_i = \gamma h_i (1 - p_{\text{drop}}).
+                \]
+
+                Setting this equal to $h_i$:
+
+                \[
+                \gamma h_i (1 - p_{\text{drop}}) = h_i.
+                \]
+
+                Dividing both sides by $h_i$ (assuming $h_i \neq 0$):
+
+                \[
+                \gamma = \frac{1}{1 - p_{\text{drop}}}.
+                \]
+
+                Thus, the required scaling factor is:
+
+                \[
+                \gamma = \frac{1}{1 - p_{\text{drop}}}.
+                \]
+
+            }
             
           \subpart[2] Why should dropout be applied during training? Why should dropout \textbf{NOT} be applied during evaluation? \textbf{Briefly explain in 2--4 sentences}. \textbf{Hint:} it may help to look at the dropout paper linked. \newline
-          
+
+            \ifans{
+
+                Dropout is applied during training because it acts as a regularization technique, reducing overfitting
+                by preventing the network from over-relying on specific neurons. By randomly dropping units during each
+                iteration, the model is forced to learn redundant representations, improving its ability to generalize
+                to unseen data. This helps reduce variance and prevents the network from memorizing patterns that are
+                too specific to the training set.
+
+                Dropout should \textbf{not} be used during evaluation because it would remove some of the learned
+                connections, effectively weakening the model. Instead, during evaluation, we use the entire network
+                and scale the weights appropriately to match the expected activations during training. This ensures
+                that the model can fully utilize what it has learned without unnecessary disruptions.
+
+            }
          
         \end{subparts}
 
