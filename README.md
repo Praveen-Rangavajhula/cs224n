@@ -13,4 +13,8 @@ If you're following along, **I strongly encourage you to first try solving the a
 before checking any solutions. Stick to `main`, create your own branch, 
 and give it a shot before comparing with my answers.
 
-That's it for now. Let's see how this goes.
+## Assignment Progress
+- **Assignment 1** – Exploring Word Vectors ✅ (Completed)  
+- **Assignment 2** – Word2Vec and Dependency Parsing ✅ (Completed)  
+- **Assignment 3** – TBD ⏳ (Not Started)  
+- **Assignment 4** – TBD ⏳ (Not Started)  
