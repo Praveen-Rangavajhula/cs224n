@@ -347,21 +347,23 @@ Rewriting using $\by_w$ (the one-hot label) and $\hat{\by}_w$ (the softmax outpu
 
 \paragraph{Step 3: Special Cases}
 
-- **Case 1: When $w = o$ (the true outside word)**
+\begin{itemize}
+    \item \textbf{Case 1: When \( w = o \) (the true outside word)}
 
-  Since $\by_o = 1$ and $\hat{\by}_o$ is the softmax probability for the correct outside word:
+    Since \( \by_o = 1 \) and \( \hat{\by}_o \) is the softmax probability for the correct outside word:
 
-  \[
-  \frac{\partial \bJ}{\partial \bu_o} = (\hat{\by}_o - 1) \bv_c.
-  \]
+    \[
+    \frac{\partial \bJ}{\partial \bu_o} = (\hat{\by}_o - 1) \bv_c.
+    \]
 
-- **Case 2: When $w \neq o$ (any other word in the vocabulary)**
+    \item \textbf{Case 2: When \( w \neq o \) (any other word in the vocabulary)}
 
-  Since $\by_w = 0$ for all words $w \neq o$:
+    Since \( \by_w = 0 \) for all words \( w \neq o \):
 
-  \[
-  \frac{\partial \bJ}{\partial \bu_w} = \hat{\by}_w \bv_c.
-  \]
+    \[
+    \frac{\partial \bJ}{\partial \bu_w} = \hat{\by}_w \bv_c.
+    \]
+\end{itemize}
 
 \paragraph{Final Answer:}
 \[
