@@ -49,7 +49,7 @@ class ParserModel(nn.Module):
         self.embeddings = nn.Parameter(torch.tensor(embeddings))
 
         ### YOUR CODE HERE (~9-10 Lines)
-        ### TODO:
+        ### DONE:
         ###     1) Declare `self.embed_to_hidden_weight` and `self.embed_to_hidden_bias` as `nn.Parameter`.
         ###        Initialize weight with the `nn.init.xavier_uniform_` function and bias with `nn.init.uniform_`
         ###        with default parameters.
@@ -73,8 +73,22 @@ class ParserModel(nn.Module):
         ### 
         ### See the PDF for hints.
 
+        # Init both W and b1
+        self.embed_to_hidden_weight = nn.Parameter(torch.empty(self.embed_size * self.n_features, self.hidden_size))
+        nn.init.xavier_uniform_(self.embed_to_hidden_weight)
 
+        self.embed_to_hidden_bias = nn.Parameter(torch.empty(self.hidden_size))
+        nn.init.uniform_(self.embed_to_hidden_bias)
 
+        # Construct a dropout layer with given dropout_prob
+        self.dropout = nn.Dropout(dropout_prob)
+
+        # Init both U and b2
+        self.hidden_to_logits_weight = nn.Parameter(torch.empty(self.hidden_size, self.n_classes))
+        nn.init.xavier_uniform_(self.hidden_to_logits_weight)
+
+        self.hidden_to_logits_bias = nn.Parameter(torch.empty(self.n_classes))
+        nn.init.uniform_(self.hidden_to_logits_bias)
 
         ### END YOUR CODE
 
@@ -108,6 +122,7 @@ class ParserModel(nn.Module):
         ###     Flatten: https://pytorch.org/docs/stable/generated/torch.flatten.html
         x = None
 
+        x = torch.index_select(self.embeddings, 0, w.flatten()).view(w.shape[0], -1)
 
         ### END YOUR CODE
         return x
@@ -133,9 +148,9 @@ class ParserModel(nn.Module):
                                  without applying softmax (batch_size, n_classes)
         """
         ### YOUR CODE HERE (~3-5 lines)
-        ### TODO:
+        ### DONE:
         ###     Complete the forward computation as described in write-up. In addition, include a dropout layer
-        ###     as decleared in `__init__` after ReLU function.
+        ###     as declared in `__init__` after ReLU function.
         ###
         ### Note: We do not apply the softmax to the logits here, because
         ### the loss function (torch.nn.CrossEntropyLoss) applies it more efficiently.
@@ -144,6 +159,11 @@ class ParserModel(nn.Module):
         ###     Matrix product: https://pytorch.org/docs/stable/torch.html#torch.matmul
         ###     ReLU: https://pytorch.org/docs/stable/nn.html?highlight=relu#torch.nn.functional.relu
         logits = None
+
+        x = self.embedding_lookup(w)
+        h = torch.relu(x @ self.embed_to_hidden_weight + self.embed_to_hidden_bias)
+        h = self.dropout(h)
+        logits = h @ self.hidden_to_logits_weight + self.hidden_to_logits_bias
 
         ### END YOUR CODE
         return logits

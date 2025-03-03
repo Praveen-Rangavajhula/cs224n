@@ -35,10 +35,49 @@ On each step, your parser will decide among the three transitions using a neural
     $[$ROOT, presented] & [my, findings, at, the, NLP, conference] & presented$\to$I &  \texttt{LEFT-ARC}  \\
     \end{tabular}\newline
     \end{adjustwidth}
+
+    \ifans{
+        \begin{adjustwidth}{-1cm}{}
+        \begin{table}[h!]
+        \centering
+        \resizebox{\textwidth}{!}{%
+        \begin{tabular}{ l | l | l | l}
+        Stack & Buffer & New dependency & Transition \\ \hline
+        [ROOT] & [I, presented, my, findings, at, the, NLP, conference] &  & Initial Configuration \\
+        $[$ROOT, I] & [presented, my, findings, at, the, NLP, conference] &  & \texttt{SHIFT}  \\
+        $[$ROOT, I, presented] & [my, findings, at, the, NLP, conference] &  & \texttt{SHIFT}  \\
+        $[$ROOT, presented] & [my, findings, at, the, NLP, conference] & presented$\to$I & \texttt{LEFT-ARC}  \\
+        $[$ROOT, presented, my] & [findings, at, the, NLP, conference] &  & \texttt{SHIFT}  \\
+        $[$ROOT, presented, my, findings] & [at, the, NLP, conference] &  & \texttt{SHIFT}  \\
+        $[$ROOT, presented, findings] & [at, the, NLP, conference] & findings$\to$my & \texttt{LEFT-ARC}  \\
+        $[$ROOT, presented] & [at, the, NLP, conference] & presented$\to$findings & \texttt{RIGHT-ARC}  \\
+        $[$ROOT, presented, at] & [the, NLP, conference] &  & \texttt{SHIFT}  \\
+        $[$ROOT, presented, at, the] & [NLP, conference] &  & \texttt{SHIFT}  \\
+        $[$ROOT, presented, at, the, NLP] & [conference] &  & \texttt{SHIFT}  \\
+        $[$ROOT, presented, at, the, NLP, conference] & [] &  & \texttt{SHIFT}  \\
+        $[$ROOT, presented, at, the, conference] & [] & conference$\to$NLP & \texttt{LEFT-ARC}  \\
+        $[$ROOT, presented, at, conference] & [] & conference$\to$the & \texttt{LEFT-ARC}  \\
+        $[$ROOT, presented, conference] & [] & conference$\to$at & \texttt{LEFT-ARC}  \\
+        $[$ROOT, presented] & [] & presented$\to$conference & \texttt{RIGHT-ARC}  \\
+        $[$ROOT] & [] & ROOT$\to$presented & \texttt{RIGHT-ARC}  \\
+        \end{tabular}}\label{tab:ans3-a}
+        \end{table}
+        \end{adjustwidth}
+    }
+
     
     \part[2] A sentence containing $n$ words will be parsed in how many steps (in terms of $n$)? Briefly explain in 1--2 sentences why.
 
-       
+    \ifans{
+        A sentence with $n$ words will be parsed in approximately $2n$ steps.
+        Each word must first be pushed onto the stack, requiring
+        $n$ \texttt{SHIFT} operations. Subsequently, every word must be
+        removed through either a \texttt{LEFT-ARC} or \texttt{RIGHT-ARC}
+        operation, which also occurs exactly $n$ times. Therefore, the
+        total number of transitions required for parsing is $2n$.
+    }
+
+
     
     \part[6] Implement the \texttt{\_\_init\_\_} and \texttt{parse\_step} functions in the \texttt{PartialParse} class in \texttt{parser\_transitions.py}. This implements the transition mechanics your parser will use. You can run basic (non-exhaustive) tests by running \texttt{python parser\_transitions.py part\_c}.
 
@@ -136,7 +175,168 @@ On each step, your parser will decide among the three transitions using a neural
             \item \textbf{Report the best UAS your model achieves on the dev set and the UAS it achieves on the test set in your written submission}. You can report it in the PDF and tag the page.
     \end{itemize}
     \end{enumerate}
-    
+
+
+    \ifans{
+    \begin{enumerate}[label=\roman*.]
+        \item {
+            We are given:
+            $$
+            \bh = \text{ReLU}(\bx \bW + \bb_1)
+            $$
+            where:
+            $$
+            \mathbf{z} = \bx \bW + \bb_1
+            $$
+            so that:
+            $$
+            \bh = \text{ReLU}(\mathbf{z}).
+            $$
+
+            We need to compute:
+            $$
+            \frac{\partial h_i}{\partial x_j}
+            $$
+
+            Using the chain rule:
+            $$
+            \frac{\partial h_i}{\partial x_j} = \frac{\partial h_i}{\partial z_i} \cdot \frac{\partial z_i}{\partial x_j}
+            $$
+
+            First, since ReLU is applied element-wise:
+            $$
+            h_i = \text{ReLU}(z_i) =
+            \begin{cases}
+            z_i & \text{if } z_i > 0 \\
+            0 & \text{if } z_i \leq 0
+            \end{cases}
+            $$
+            the derivative is:
+            $$
+            \frac{\partial h_i}{\partial z_i} =
+            \begin{cases}
+            1 & \text{if } z_i > 0 \\
+            0 & \text{if } z_i \leq 0
+            \end{cases}
+            $$
+
+            Next, differentiating $\mathbf{z}$:
+            $$
+            \frac{\partial z_i}{\partial x_j} = W_{ji}
+            $$
+
+            Combining both:
+            $$
+            \frac{\partial h_i}{\partial x_j} =
+            \begin{cases}
+            W_{ji} & \text{if } z_i > 0 \\
+            0 & \text{if } z_i \leq 0
+            \end{cases}
+            $$
+
+            \paragraph{Dimension Check:}
+            Let:
+            \begin{itemize}
+                \item $\bx \in \mathbb{R}^{1 \times dm}$, the input row vector.
+                \item $\bW \in \mathbb{R}^{dm \times h}$, the weight matrix.
+                \item $\bb_1 \in \mathbb{R}^{h}$, the bias vector.
+                \item $\bh \in \mathbb{R}^{1 \times h}$, the hidden layer output.
+            \end{itemize}
+
+            Since:
+            $$
+            \bz = \bx \bW + \bb_1
+            $$
+            we verify:
+            $$
+            (1 \times dm) \times (dm \times h) = (1 \times h),
+            $$
+            so the dimensions are consistent.
+
+            The derivative:
+            $$
+            \frac{\partial z_i}{\partial x_j} = W_{ji}
+            $$
+            holds since $W_{ji}$ correctly maps index $j$ of $\bx$ to index $i$ of $\bz$.
+        }
+
+        \item {
+            We are given the cross-entropy loss function:
+            $$
+            J(\theta) = CE(\by, \byt) = -\sum_{j=1}^{3} y_j \log \hat{y}_j.
+            $$
+            We need to compute:
+            $$
+            \frac{\partial CE(\by, \byt)}{\partial l_i}.
+            $$
+
+            Using the chain rule:
+            $$
+            \frac{\partial J}{\partial l_i} = \sum_{j=1}^{3} \frac{\partial J}{\partial \hat{y}_j} \cdot \frac{\partial \hat{y}_j}{\partial l_i}.
+            $$
+
+            \paragraph{Step 1: Compute $\frac{\partial J}{\partial \hat{y}_j}$}
+            From the definition of cross-entropy loss:
+            $$
+            \frac{\partial J}{\partial \hat{y}_j} = - \frac{y_j}{\hat{y}_j}.
+            $$
+
+            \paragraph{Step 2: Compute $\frac{\partial \hat{y}_j}{\partial l_i}$}
+            The softmax function is defined as:
+            $$
+            \hat{y}_j = \frac{e^{l_j}}{\sum_{k=1}^{3} e^{l_k}}.
+            $$
+            Differentiating w.r.t. $l_i$, we obtain:
+            $$
+            \frac{\partial \hat{y}_j}{\partial l_i} =
+            \begin{cases}
+            \hat{y}_i (1 - \hat{y}_i) & \text{if } i = j, \\
+            -\hat{y}_i \hat{y}_j & \text{if } i \neq j.
+            \end{cases}
+            $$
+
+            \paragraph{Step 3: Compute $\frac{\partial J}{\partial l_i}$}
+            Combining both results:
+            $$
+            \frac{\partial J}{\partial l_i} =
+            \sum_{j=1}^{3} \left(- \frac{y_j}{\hat{y}_j} \right) \cdot \frac{\partial \hat{y}_j}{\partial l_i}.
+            $$
+
+            Since $y_j = 1$ only when $j = c$, this simplifies to:
+            $$
+            \frac{\partial J}{\partial l_i} = \hat{y}_i - y_i.
+            $$
+
+            \paragraph{Final Answer:}
+            \begin{itemize}
+                \item If $i = c$: \quad $\frac{\partial J}{\partial l_i} = \hat{y}_i - 1$.
+                \item Otherwise: \quad $\frac{\partial J}{\partial l_i} = \hat{y}_i$.
+            \end{itemize}
+        }
+
+        \item {
+            \textbf{Final UAS Scores:}
+
+            After training and evaluating the neural dependency parser, the best Unlabeled Attachment Scores (UAS) achieved are as follows:
+
+            \begin{itemize}
+                \item \textbf{Best UAS on Dev Set:} 87.96
+                \item \textbf{Final UAS on Test Set:} 88.12
+            \end{itemize}
+
+            \textbf{Training Details:}
+            \begin{itemize}
+                \item Loss on train set: 0.0673
+                \item Model successfully passed all sanity checks (\texttt{-e} and \texttt{-f} flags).
+                \item Training was performed using the provided hyperparameters.
+            \end{itemize}
+
+            The final UAS scores meet the expected performance criteria outlined in the assignment.
+        }
+
+    \end{enumerate}
+
+    } \\
     
 \part[12] We'd like to look at example dependency parses and understand where parsers like ours might be wrong. For example, in this sentence:
 
@@ -205,7 +405,53 @@ In particular, you \textbf{do not} need to look at the labels on the the depende
 
 \input{dep_parses.tex}
 
+\ifans{
+\begin{enumerate}[label=\roman*.]
+    \item {
+        \begin{itemize}
+        \item \textbf{Error type}: Verb Phrase Attachment Error
+        \item \textbf{Incorrect dependency}: acquisition $\rightarrow$ citing
+        \item \textbf{Correct dependency}: blocked $\rightarrow$ citing
+        \end{itemize}
+    }
+    \item {
+        \begin{itemize}
+        \item \textbf{Error type}: Prepositional Phrase Attachment Error
+        \item \textbf{Incorrect dependency}: elements $\rightarrow$ success
+        \item \textbf{Correct dependency}: crucial $\rightarrow$ success
+        \end{itemize}
+    }
+    \item {
+        \begin{itemize}
+        \item \textbf{Error type}: Modifier Attachment Error
+        \item \textbf{Incorrect dependency}: declined $\rightarrow$ decision
+        \item \textbf{Correct dependency}: reasons $\rightarrow$ decision
+        \end{itemize}
+    }
+    \item {
+        \begin{itemize}
+        \item \textbf{Error type}: Coordination Attachment Error
+        \item \textbf{Incorrect dependency}: affects $\rightarrow$ one
+        \item \textbf{Correct dependency}: plants $\rightarrow$ one
+        \end{itemize}
+    }
+
+\end{enumerate}
+}
 
 \part[2] Recall in part (e), the parser uses features which includes words and their part-of-speech (POS) tags. Explain the benefit of using part-of-speech tags as features in the parser?
+
+\ifans{
+    The benefit of using part-of-speech (POS) tagging in a parser is that it helps resolve
+    ambiguity in the role of a word within a sentence. For example, a word like "run"
+    can function as either a noun or a verb, and relying only on the word itself may
+    lead to incorrect parsing. By including POS tags, the model can learn not just from
+    the word but also from the sentence structure, making parsing more efficient.
+
+    Additionally, POS tagging is especially useful when encountering rare or unseen words.
+    Even if the parser does not recognize a specific word, knowing its POS tag allows
+    it to generalize based on similar words it has seen before. This improves the model's
+    ability to correctly analyze sentence structure and assign dependencies more accurately.
+}
 
 \end{parts}
