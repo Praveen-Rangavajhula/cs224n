@@ -180,3 +180,6 @@ cython_debug/
 /out/main.synctex.gz
 /assignments/a2/code/results
 /assignments/a2/code/results
+/experiments/spiral_linear.png
+/experiments/spiral_net.png
+/experiments/spiral_raw.png
