@@ -1,6 +1,6 @@
 # CS224N Notes & Assignments
 
-This repository is for my **self-education** while following Stanford’s **CS224N: Natural Language Processing with Deep Learning** course. I'm watching the lectures from the [YouTube playlist](https://www.youtube.com/playlist?list=PLoROMvodv4rMFqRtEuo6SGjY4XbRIVRd4) and solving the **Winter 2025** assignments from the [official course page](https://web.stanford.edu/class/cs224n/index.html#schedule).
+This repository is for my **self-education** while following Stanford’s **CS224N: Natural Language Processing with Deep Learning** course. I'm watching the lectures from the [YouTube playlist](https://www.youtube.com/playlist?list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D) and solving the **Winter 2025** assignments from the [official course page](https://web.stanford.edu/class/cs224n/index.html#schedule).
 
 I'll also be adding my own **notes** from the lectures as I go. If you’re interested in those, stay tuned.
 
