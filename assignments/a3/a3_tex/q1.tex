@@ -140,6 +140,19 @@ After setting up the cloud VM, you should turn it off while you work on the prog
     First explain (in around three sentences) what effect the masks have on the entire attention computation.
     Then explain (in one or two sentences) why it is necessary to use the masks in this way.
 
+    \ifans{
+        During attention computation, the mask ensures that the decoder does not attend to padded tokens. Since the mask
+        assigns $1$s to padding positions, the attention scores $e_t$ for these positions are set to $-\infty$ using
+        the operation \texttt{e\_t.data.masked\_fill\_(enc\_masks.bool(), -float('inf'))}. When softmax is applied,
+        these positions receive a probability of $0$, meaning they do not contribute to the final weighted sum of encoder
+        hidden states.
+
+        This masking is necessary because padding tokens do not contain meaningful information and should not influence
+        the decoder's predictions. By ensuring the decoder ignores these tokens, the model focuses only on relevant
+        parts of the input sequence, improving translation quality and preventing noise from affecting attention computations.
+    }\fi
+
+
 
 \end{parts}
 
@@ -186,7 +199,10 @@ You should see a significant decrease in loss during the initial iterations (Fig
 sh run.sh test
 \end{lstlisting}
     Please report the model's corpus BLEU Score. It should be larger than 18.
-    
+
+    \ifans{
+        Corpus BLEU: 20.527556606934834
+    }\fi
 
     
     \part[4] (written) In class, we learned about dot product attention, multiplicative attention, and additive attention.  As a reminder, dot product attention is $\be_{t,i} = \bs_t^T\bh_i$, multiplicative attention is $\be_{t,i} = \bs_t^T\bW\bh_i$, and additive attention is $\be_{t,i} = \bv^T \text{tanh}(\bW_1\bh_i + \bW_2\bs_t)$.
@@ -196,5 +212,22 @@ sh run.sh test
     \subpart[2] Explain one advantage and one disadvantage of \textit{additive attention} compared to multiplicative attention.
     \end{subparts}
             
-    
+
+    \ifans{
+        \textbf{Dot Product Attention vs. Multiplicative Attention:}
+        An advantage of dot product attention is that it requires fewer computations and fewer parameters since it
+        avoids the weight matrix $\mathbf{W}$ in multiplicative attention. This makes it computationally cheaper and
+        easier to optimize. A disadvantage of dot product attention is that it assumes the encoder and decoder hidden
+        states have the same dimension. If they have different dimensions, an additional transformation is needed,
+        which multiplicative attention naturally handles with the learnable matrix $\mathbf{W}$.
+
+        \textbf{Additive Attention vs. Multiplicative Attention:}
+        An advantage of additive attention is that it is more expressive and can model complex dependencies between the
+        encoder and decoder hidden states due to the non-linearity introduced by the $\tanh$ activation and additional
+        transformations. This allows it to focus more effectively on relevant information. However, a disadvantage of
+        additive attention is that it introduces additional weight matrices ($\mathbf{W}_1, \mathbf{W}_2$) and a
+        parameter vector $\mathbf{v}$, which increase computational cost and memory usage. This makes it less efficient
+        than multiplicative attention, especially in large-scale applications.
+    }\fi
+
 \end{parts}

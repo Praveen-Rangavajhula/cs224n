@@ -183,3 +183,9 @@ cython_debug/
 /experiments/spiral_linear.png
 /experiments/spiral_net.png
 /experiments/spiral_raw.png
+/assignments/a3/code/runs/nmt_local/events.out.tfevents.1741838543.Raven.34548.0
+/assignments/a3/code/model.bin
+/assignments/a3/code/model.bin.optim
+/out/main.aux
+/out/main.out
+/assignments/a3/code/outputs/test_outputs.txt

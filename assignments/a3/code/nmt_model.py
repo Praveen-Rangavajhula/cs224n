@@ -570,7 +570,7 @@ class NMT(nn.Module):
         """ Load the model from a file.
         @param model_path (str): path to model
         """
-        params = torch.load(model_path, map_location=lambda storage, loc: storage)
+        params = torch.load(model_path, map_location=lambda storage, loc: storage, weights_only=False)
         args = params['args']
         model = NMT(vocab=params['vocab'], **args)
         model.load_state_dict(params['state_dict'])
