@@ -170,3 +170,18 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /experiments/glove.6B/
+/assignments/a3/code/runs/nmt_local/events.out.tfevents.1741838543.Raven.34548.0
+/auxil/main.aux
+/out/main.aux
+/auxil/main.out
+/out/main.out
+/out/main.pdf
+/out/main.synctex.gz
+/assignments/a3/code/model.bin
+/assignments/a3/code/model.bin.optim
+/assignments/a2/code/results/20250302_182914/model.weights
+/assignments/a2/code/results/20250302_183050/model.weights
+/experiments/spiral_linear.png
+/experiments/spiral_net.png
+/experiments/spiral_raw.png
+/assignments/a3/code/outputs/test_outputs.txt
