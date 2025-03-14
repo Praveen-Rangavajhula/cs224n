@@ -16,5 +16,5 @@ and give it a shot before comparing with my answers.
 ## Assignment Progress
 - **Assignment 1** – Exploring Word Vectors ✅ (Completed)  
 - **Assignment 2** – Word2Vec and Dependency Parsing ✅ (Completed)  
-- **Assignment 3** – TBD ⏳ (Not Started)  
+- **Assignment 3** – Neural Machine Translation & Analysis ✅ (Completed)  
 - **Assignment 4** – TBD ⏳ (Not Started)  
